@@ -1,0 +1,27 @@
+{
+  "name": "@doctor/tar-stream",
+  "version": "1.0.0",
+  "exports": {
+    ".": "./mod.ts",
+    "./tar": "./tar.ts",
+    "./untar": "./untar.ts"
+  },
+  "publish": {
+    "exclude": [
+      ".*"
+    ]
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1.0.0"
+  },
+  "fmt": {
+    "indentWidth": 2,
+    "semiColons": false,
+    "singleQuote": true
+  },
+  "tasks": {
+    "lock": "deno check *.ts && deno cache --lock-write *.ts",
+    "test": "deno test tests.ts",
+    "ok": "deno fmt && deno lint && deno task test"
+  }
+}
