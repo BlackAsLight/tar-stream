@@ -6,7 +6,7 @@ on:
 
 jobs:
   publish:
-    runs-on: ubuntu-;atest
+    runs-on: ubuntu-latest
 
     permissions:
       contents: write
