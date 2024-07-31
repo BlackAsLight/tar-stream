@@ -200,7 +200,8 @@ export class UnTarStream {
                   if (done) {
                     header = undefined
                     lock = false
-                    throw new Error('Tarball ended unexpectedly.')
+                    controller.error('Tarball ended unexpectedly.')
+                    return
                   }
                   if (controller.byobRequest?.view) {
                     const buffer = new Uint8Array(
