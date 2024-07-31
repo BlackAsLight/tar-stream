@@ -3,7 +3,7 @@
  */
 
 /**
- * The original tar  archive  header format.
+ * The original tar archive header format.
  */
 export interface OldStyleFormat {
   name: string
