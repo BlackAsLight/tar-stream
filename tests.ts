@@ -214,6 +214,11 @@ Deno.test('expandTarArchiveCheckingBodiesDefaultStream', async function () {
       size: text.length,
       iterable: [text.slice()],
     },
+    {
+      pathname: './text2.txt',
+      size: text.length,
+      iterable: [text.slice()],
+    },
   ])
     .pipeThrough(new TarStream())
     .pipeThrough(new UnTarStream())

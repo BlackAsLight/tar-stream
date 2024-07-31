@@ -3,7 +3,7 @@
  */
 
 /**
- * The original tar	archive	header format.
+ * The original tar archive header format.
  */
 export interface OldStyleFormat {
   name: string
@@ -188,7 +188,7 @@ export class UnTarStream {
             readable: new ReadableStream({
               type: 'bytes',
               async pull(controller) {
-                if (i >= 0) {
+                if (i > 0) {
                   lock = true
                   const { done, value } = await async function () {
                     const x = await reader.read()
@@ -200,15 +200,13 @@ export class UnTarStream {
                   if (done) {
                     header = undefined
                     lock = false
-                    controller.close()
-                    controller.byobRequest?.respond(0)
+                    controller.error('Tarball ended unexpectedly.')
                     return
                   }
                   if (controller.byobRequest?.view) {
                     const buffer = new Uint8Array(
                       controller.byobRequest.view.buffer,
                     )
-
                     const size = buffer.length
                     if (size < value.length) {
                       buffer.set(value.slice(0, size))
@@ -228,6 +226,7 @@ export class UnTarStream {
                     reader.cancel(reason)
                   }
                   controller.close()
+                  controller.byobRequest?.respond(0)
                 }
               },
               async cancel(r) {
