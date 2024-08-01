@@ -277,3 +277,35 @@ Deno.test('expandTarArchiveCheckingBodiesByteStream', async function () {
     }
   }
 })
+
+Deno.test('UnTarStream() with size equals to multiple of 512', async () => {
+  const size = 512 * 3
+  const data = Uint8Array.from({ length: size }, () => Math.floor(Math.random() * 256))
+
+  const readable = ReadableStream.from<TarInput>([
+    {
+      pathname: 'name',
+      size,
+      iterable: [data.slice()],
+    },
+  ])
+    .pipeThrough(new TarStream())
+    .pipeThrough(new UnTarStream())
+
+  for await (const item of readable) {
+    if (item.readable) {
+      const buffer = new Uint8Array(data.length)
+      let offset = 0
+      const reader = item.readable.getReader()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) {
+          break
+        }
+        buffer.set(value, offset)
+        offset += value.length
+      }
+      assertEquals(buffer, data)
+    }
+  }
+})

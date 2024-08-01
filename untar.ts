@@ -192,7 +192,7 @@ export class UnTarStream {
                   lock = true
                   const { done, value } = await async function () {
                     const x = await reader.read()
-                    if (!x.done && i-- === 1) {
+                    if (!x.done && i-- === 1 && size % 512 > 0) {
                       x.value = x.value.slice(0, size % 512) // Slice off suffix padding.
                     }
                     return x
