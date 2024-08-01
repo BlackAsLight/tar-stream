@@ -49,6 +49,8 @@ export interface TarDir {
  */
 export type TarInput = TarFile | TarDir
 
+const SLASH_CODE_POINT = '/'.charCodeAt(0)
+
 /**
  * A TransformStream that creates a Tarball. Taking in a
  * ReadableStream<TarInput> and outputting a ReadableStream<Uint8Array>.
@@ -86,7 +88,7 @@ export class TarStream {
         const pathname = typeof chunk.pathname === 'string'
           ? parsePathname(chunk.pathname, !('size' in chunk))
           : function () {
-            if ('size' in chunk === (chunk.pathname[1].slice(-1)[0] === 47)) {
+            if ('size' in chunk === (chunk.pathname[1].slice(-1)[0] === SLASH_CODE_POINT)) {
               controller.error(
                 `Pre-parsed pathname for ${
                   'size' in chunk ? 'directory' : 'file'
@@ -253,15 +255,15 @@ export function parsePathname(
     throw new Error('Invalid Pathname! Pathname cannot exceed 256 bytes.')
   }
 
-  let i = Math.max(0, name.lastIndexOf(47))
+  let i = Math.max(0, name.lastIndexOf(SLASH_CODE_POINT))
   if (pathname.slice(i + 1).length > 100) {
     throw new Error('Invalid Filename! Filename cannot exceed 100 bytes.')
   }
 
   for (; i > 0; --i) {
-    i = name.lastIndexOf(47, i) + 1
+    i = name.lastIndexOf(SLASH_CODE_POINT, i) + 1
     if (name.slice(i + 1).length > 100) {
-      i = Math.max(0, name.indexOf(47, i + 1))
+      i = Math.max(0, name.indexOf(SLASH_CODE_POINT, i + 1))
       break
     }
   }
