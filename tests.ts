@@ -277,3 +277,39 @@ Deno.test('expandTarArchiveCheckingBodiesByteStream', async function () {
     }
   }
 })
+
+Deno.test('TarStream() with extra long pathname', async () => {
+  const text = new TextEncoder().encode('Hello World!')
+
+  const readable = ReadableStream.from<TarInput>([
+    {
+      // 100 || N
+      pathname: './Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeery/LongPath',
+    },
+    {
+      // 16 (<155) || 95 (<100)
+      //                           v Split here
+      pathname: './some random path/with/loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong/path',
+    },
+    {
+      // test with regular file
+      pathname: './some random path/with/loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong/file',
+      size: text.length,
+      iterable: [text.slice()],
+    },
+  ])
+    .pipeThrough(new TarStream())
+    .pipeThrough(new UnTarStream())
+
+  const pathnames: string[] = []
+  for await (const item of readable) {
+    pathnames.push(item.pathname)
+    item.readable?.cancel()
+  }
+  assertEquals(pathnames, [
+    'Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeery/LongPath/',
+    'some random path/with/loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong/path/',
+    'some random path/with/loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong/file',
+  ])
+})
+
