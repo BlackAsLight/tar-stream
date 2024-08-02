@@ -88,7 +88,10 @@ export class TarStream {
         const pathname = typeof chunk.pathname === 'string'
           ? parsePathname(chunk.pathname, !('size' in chunk))
           : function () {
-            if ('size' in chunk === (chunk.pathname[1].slice(-1)[0] === SLASH_CODE_POINT)) {
+            if (
+              'size' in chunk ===
+                (chunk.pathname[1].slice(-1)[0] === SLASH_CODE_POINT)
+            ) {
               controller.error(
                 `Pre-parsed pathname for ${
                   'size' in chunk ? 'directory' : 'file'
@@ -261,7 +264,11 @@ export function parsePathname(
     throw new Error('Invalid Filename! Filename cannot exceed 100 bytes.')
   }
 
-  for (let nextPos = suitableSlashPos; nextPos > 0; suitableSlashPos = nextPos) {
+  for (
+    let nextPos = suitableSlashPos;
+    nextPos > 0;
+    suitableSlashPos = nextPos
+  ) {
     // disclaimer: '/' won't appear at pos 0, so nextPos always be > 0 or = -1
     nextPos = name.lastIndexOf(SLASH_CODE_POINT, suitableSlashPos - 1)
     // disclaimer: since name.length > 100 in this case, if nextPos = -1, name.length - nextPos will also > 100
