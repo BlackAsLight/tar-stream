@@ -283,7 +283,6 @@ Deno.test('expandTarArchiveCheckingBodiesByteStream', async function () {
   }
 })
 
-
 Deno.test('parsePathname()', () => {
   const encoder = new TextEncoder()
 
@@ -325,6 +324,7 @@ Deno.test('parsePathname()', () => {
       ),
     ],
   )
+})
 
 Deno.test('UnTarStream() with size equals to multiple of 512', async () => {
   const size = 512 * 3
