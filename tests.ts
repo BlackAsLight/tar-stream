@@ -294,18 +294,12 @@ Deno.test('UnTarStream() with size equals to multiple of 512', async () => {
 
   for await (const item of readable) {
     if (item.readable) {
-      const buffer = new Uint8Array(data.length)
-      let offset = 0
-      const reader = item.readable.getReader()
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) {
-          break
-        }
-        buffer.set(value, offset)
-        offset += value.length
-      }
-      assertEquals(buffer, data)
+      assertEquals(
+        Uint8Array.from(
+          (await Array.fromAsync(item.readable)).map((x) => [...x]).flat()
+        ),
+        data
+      )
     }
   }
 })
