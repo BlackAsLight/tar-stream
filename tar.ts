@@ -49,6 +49,8 @@ export interface TarDir {
  */
 export type TarInput = TarFile | TarDir
 
+const SLASH_CODE_POINT = '/'.charCodeAt(0)
+
 /**
  * A TransformStream that creates a Tarball. Taking in a
  * ReadableStream<TarInput> and outputting a ReadableStream<Uint8Array>.
@@ -86,7 +88,10 @@ export class TarStream {
         const pathname = typeof chunk.pathname === 'string'
           ? parsePathname(chunk.pathname, !('size' in chunk))
           : function () {
-            if ('size' in chunk === (chunk.pathname[1].slice(-1)[0] === 47)) {
+            if (
+              'size' in chunk ===
+                (chunk.pathname[1].slice(-1)[0] === SLASH_CODE_POINT)
+            ) {
               controller.error(
                 `Pre-parsed pathname for ${
                   'size' in chunk ? 'directory' : 'file'
@@ -253,26 +258,32 @@ export function parsePathname(
     throw new Error('Invalid Pathname! Pathname cannot exceed 256 bytes.')
   }
 
-  let i = Math.max(0, name.lastIndexOf(47))
-  if (pathname.slice(i + 1).length > 100) {
+  // If length of last part is > 100, then there's no possible answer to split the path
+  let suitableSlashPos = Math.max(0, name.lastIndexOf(SLASH_CODE_POINT)) // always holds position of '/'
+  if (name.length - suitableSlashPos > 100) {
     throw new Error('Invalid Filename! Filename cannot exceed 100 bytes.')
   }
 
-  for (; i > 0; --i) {
-    i = name.lastIndexOf(47, i) + 1
-    if (name.slice(i + 1).length > 100) {
-      i = Math.max(0, name.indexOf(47, i + 1))
+  for (
+    let nextPos = suitableSlashPos;
+    nextPos > 0;
+    suitableSlashPos = nextPos
+  ) {
+    // disclaimer: '/' won't appear at pos 0, so nextPos always be > 0 or = -1
+    nextPos = name.lastIndexOf(SLASH_CODE_POINT, suitableSlashPos - 1)
+    // disclaimer: since name.length > 100 in this case, if nextPos = -1, name.length - nextPos will also > 100
+    if (name.length - nextPos > 100) {
       break
     }
   }
 
-  const prefix = name.slice(0, i)
+  const prefix = name.slice(0, suitableSlashPos)
   if (prefix.length > 155) {
     throw new Error(
       'Invalid Pathname! Pathname needs to be split-able on a forward slash separator into [155, 100] bytes respectively.',
     )
   }
-  return [prefix, name.slice(i + 1)]
+  return [prefix, name.slice(suitableSlashPos + 1)]
 }
 
 /**

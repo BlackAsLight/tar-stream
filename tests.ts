@@ -1,5 +1,10 @@
 import { assertEquals, assertRejects } from '@std/assert'
-import { type TarInput, TarStream, validTarOptions } from './tar.ts'
+import {
+  parsePathname,
+  type TarInput,
+  TarStream,
+  validTarOptions,
+} from './tar.ts'
 import { UnTarStream } from './untar.ts'
 
 Deno.test('TarStream() with default stream', async () => {
@@ -276,6 +281,49 @@ Deno.test('expandTarArchiveCheckingBodiesByteStream', async function () {
       assertEquals(buffer, text)
     }
   }
+})
+
+Deno.test('parsePathname()', () => {
+  const encoder = new TextEncoder()
+
+  assertEquals(
+    parsePathname(
+      './Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeery/LongPath',
+      true,
+    ),
+    [
+      encoder.encode(
+        'Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeery',
+      ),
+      encoder.encode('LongPath/'),
+    ],
+  )
+
+  assertEquals(
+    parsePathname(
+      './some random path/with/loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong/path',
+      true,
+    ),
+    [
+      encoder.encode('some random path'),
+      encoder.encode(
+        'with/loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong/path/',
+      ),
+    ],
+  )
+
+  assertEquals(
+    parsePathname(
+      './some random path/with/loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong/file',
+      false,
+    ),
+    [
+      encoder.encode('some random path'),
+      encoder.encode(
+        'with/loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong/file',
+      ),
+    ],
+  )
 })
 
 Deno.test('UnTarStream() with size equals to multiple of 512', async () => {
