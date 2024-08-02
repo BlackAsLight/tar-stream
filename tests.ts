@@ -283,6 +283,7 @@ Deno.test('expandTarArchiveCheckingBodiesByteStream', async function () {
   }
 })
 
+
 Deno.test('parsePathname()', () => {
   const encoder = new TextEncoder()
 
@@ -324,4 +325,32 @@ Deno.test('parsePathname()', () => {
       ),
     ],
   )
+
+Deno.test('UnTarStream() with size equals to multiple of 512', async () => {
+  const size = 512 * 3
+  const data = Uint8Array.from(
+    { length: size },
+    () => Math.floor(Math.random() * 256),
+  )
+
+  const readable = ReadableStream.from<TarInput>([
+    {
+      pathname: 'name',
+      size,
+      iterable: [data.slice()],
+    },
+  ])
+    .pipeThrough(new TarStream())
+    .pipeThrough(new UnTarStream())
+
+  for await (const item of readable) {
+    if (item.readable) {
+      assertEquals(
+        Uint8Array.from(
+          (await Array.fromAsync(item.readable)).map((x) => [...x]).flat(),
+        ),
+        data,
+      )
+    }
+  }
 })
