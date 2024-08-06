@@ -3,6 +3,7 @@
   "packages": {
     "specifiers": {
       "jsr:@std/assert@^1.0.0": "jsr:@std/assert@1.0.0",
+      "jsr:@std/bytes@^1.0.2": "jsr:@std/bytes@1.0.2",
       "jsr:@std/internal@^1.0.1": "jsr:@std/internal@1.0.1"
     },
     "jsr": {
@@ -12,6 +13,9 @@
           "jsr:@std/internal@^1.0.1"
         ]
       },
+      "@std/bytes@1.0.2": {
+        "integrity": "fbdee322bbd8c599a6af186a1603b3355e59a5fb1baa139f8f4c3c9a1b3e3d57"
+      },
       "@std/internal@1.0.1": {
         "integrity": "6f8c7544d06a11dd256c8d6ba54b11ed870aac6c5aeafff499892662c57673e6"
       }
@@ -20,7 +24,8 @@
   "remote": {},
   "workspace": {
     "dependencies": [
-      "jsr:@std/assert@^1.0.0"
+      "jsr:@std/assert@^1.0.0",
+      "jsr:@std/bytes@^1.0.2"
     ]
   }
 }
